@@ -1,0 +1,33 @@
+name: Build ZeroClaw with WeChat
+
+on:
+  workflow_dispatch:   # 手动触发，避免每次 push 都跑
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: "1.82"
+
+      - name: Cache cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-wechat-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Build
+        run: cargo build --release --locked --features channel-wechat
+
+      - name: Upload binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: zeroclaw-wechat-linux-amd64
+          path: target/release/zeroclaw
