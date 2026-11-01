@@ -7,35 +7,14 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          fetch-tags: true
-
-      - name: Checkout latest stable tag
+      - name: Build via official install.sh
         run: |
-          git fetch --tags --force
-          LATEST_TAG=$(git describe --tags --abbrev=0)
-          echo "Building $LATEST_TAG"
-          git checkout "$LATEST_TAG"
-
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Cache cargo
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-          key: ${{ runner.os }}-cargo-wechat-${{ hashFiles('**/Cargo.lock') }}
-
-      - name: Build
-        run: cargo build --release --locked --features channel-wechat
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable
+          source $HOME/.cargo/env
+          curl -fsSL https://raw.githubusercontent.com/zeroclaw-labs/zeroclaw/master/install.sh | sh -s -- --source --features agent-runtime,gateway,channel-wechat
 
       - name: Upload binary
         uses: actions/upload-artifact@v4
         with:
           name: zeroclaw-wechat-linux-amd64
-          path: target/release/zeroclaw
+          path: /home/runner/.cargo/bin/zeroclaw
