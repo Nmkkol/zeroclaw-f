@@ -8,10 +8,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
 
       - name: Checkout latest stable tag
         run: |
-          git fetch --tags
+          git fetch --tags --force
           LATEST_TAG=$(git describe --tags --abbrev=0)
           echo "Building $LATEST_TAG"
           git checkout "$LATEST_TAG"
